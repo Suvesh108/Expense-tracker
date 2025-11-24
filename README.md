@@ -30,10 +30,7 @@ A lightweight and user-friendly web application for managing daily expenses. Bui
 * Editing existing expenses
 * Charts and visual insights
 * Filter by date or category
-* Export data to CSV
 
-## 📄 License
 
-This project is open-source and available under the MIT License.
 
 
