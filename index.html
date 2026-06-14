@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Expense Tracker Dashboard</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💰</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="layout-wrapper">
+        <!-- Sidebar Navigation (Desktop) -->
+        <nav class="sidebar">
+            <div class="brand">
+                <h1><i class="fa-solid fa-wallet text-accent" style="margin-right: 0.5rem;"></i>ExTrack<span class="dot">.</span></h1>
+            </div>
+            <ul class="nav-links">
+                <li class="nav-item active" data-target="view-dashboard" data-title="Overview"><i class="fa-solid fa-chart-pie"></i> <span>Dashboard</span></li>
+                <li class="nav-item" data-target="view-transactions" data-title="Transactions"><i class="fa-solid fa-list-ul"></i> <span>Transactions</span></li>
+                <li class="nav-item" data-target="view-goals" data-title="Savings Goals"><i class="fa-solid fa-bullseye"></i> <span>Goals</span></li>
+                <li class="nav-item" data-target="view-settings" data-title="Settings"><i class="fa-solid fa-gear"></i> <span>Settings</span></li>
+            </ul>
+            <div class="sidebar-footer">
+                 <button class="profile-trigger sidebar-profile" id="sidebarProfileTrigger">
+                    <img src="https://ui-avatars.com/api/?name=User&background=059669&color=fff&bold=true" id="sidebarProfileAvatar" alt="User">
+                    <span class="profile-name" id="sidebarProfileName">User</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Topbar -->
+            <header class="topbar">
+                <h2 id="pageTitle" class="page-title">Overview</h2>
+                <div class="header-controls">
+                    <select class="action-select" id="currencySelector" title="Select Currency">
+                        <option value="$">USD ($)</option>
+                        <option value="€">EUR (€)</option>
+                        <option value="£">GBP (£)</option>
+                        <option value="¥">JPY (¥)</option>
+                        <option value="₹">INR (₹)</option>
+                    </select>
+                    <!-- Mobile profile trigger -->
+                    <button class="profile-trigger mobile-only" id="mobileProfileTrigger">
+                        <img src="https://ui-avatars.com/api/?name=User&background=059669&color=fff&bold=true" id="mobileProfileAvatar" alt="User">
+                    </button>
+                </div>
+            </header>
+
+            <!-- Views Container -->
+            <div class="views-container">
+                <!-- Dashboard View -->
+                <div id="view-dashboard" class="view-section active">
+                    <div class="bento-grid">
+                        <section class="bento-panel balance-panel bento-span-7">
+                            <div class="panel-header">
+                                <h2>Total Balance</h2>
+                                <div style="display: flex; gap: 1rem; align-items: center;">
+                                    <form id="quickIncomeForm" style="display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+                                        <input type="number" id="quickIncomeAmount" placeholder="Amount" step="0.01" required style="width: 130px; height: 40px; padding: 0 0.75rem; border-radius: 10px; border: 1px solid var(--border-glass-strong); background: transparent; color: var(--text-primary); font-size: 1rem; outline: none;">
+                                        <button type="submit" class="icon-btn" style="width: 40px; height: 40px; border-radius: 10px; min-height: 40px;" title="Quick Add Income"><i class="fa-solid fa-plus"></i></button>
+                                    </form>
+                                    <span class="status-indicator">Live</span>
+                                </div>
+                            </div>
+                            <h3 id="balance" class="balance-display">$0.00</h3>
+                            <div class="metrics-row">
+                                <div class="metric income-metric">
+                                    <span class="metric-label">Income</span>
+                                    <span id="money-plus" class="metric-value">+$0.00</span>
+                                </div>
+                                <div class="metric-divider"></div>
+                                <div class="metric expense-metric">
+                                    <span class="metric-label">Expense</span>
+                                    <span id="money-minus" class="metric-value">-$0.00</span>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="bento-panel chart-panel bento-span-5">
+                            <div class="panel-header">
+                                <h2>Analytics Flow</h2>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="expenseChart"></canvas>
+                            </div>
+                        </section>
+                        
+                        <section class="bento-panel velocity-panel bento-span-6">
+                            <div class="panel-header">
+                                <h2>Spend Velocity</h2>
+                                <i class="fa-solid fa-bolt text-accent"></i>
+                            </div>
+                            <div class="velocity-content">
+                                <h3 class="velocity-status positive">12% Slower</h3>
+                                <p class="velocity-desc">You are spending less than your average pace last month. Keep it up!</p>
+                                <div class="velocity-bar-wrap">
+                                    <div class="velocity-marker-avg" title="Last Month's Average"></div>
+                                    <div class="velocity-bar-bg">
+                                        <div class="velocity-bar-fill" style="width: 78%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <section class="bento-panel history-preview-panel bento-span-6">
+                            <div class="panel-header">
+                                <h2>Recent</h2>
+                                <button class="ghost-btn text-accent" onclick="document.querySelector('.sidebar .nav-item[data-target=\'view-transactions\']').click()" style="padding:0">View All</button>
+                            </div>
+                            <ul id="list-preview" class="activity-list" style="max-height: 200px;">
+                                <!-- Transactions preview injected here -->
+                            </ul>
+                        </section>
+                    </div>
+                </div>
+
+                <!-- Transactions View -->
+                <div id="view-transactions" class="view-section">
+                    <div class="bento-grid">
+                        <section class="bento-panel action-panel bento-span-4">
+                            <div class="panel-header">
+                                <h2>New Transaction</h2>
+                            </div>
+                            <form id="form" class="aesthetic-form">
+                                <div class="input-group">
+                                    <input type="text" id="text" placeholder="Design subscription, Coffee..." autocomplete="off" required>
+                                </div>
+                                <div class="input-group amount-group">
+                                    <input type="number" id="amount" placeholder="Amount" step="0.01" required>
+                                </div>
+                                <button type="submit" class="submit-action">Proceed <i class="fa-solid fa-arrow-right"></i></button>
+                            </form>
+                        </section>
+
+                        <section class="bento-panel history-panel bento-span-8">
+                            <div class="panel-header">
+                                <h2>All Activity</h2>
+                            </div>
+                            <ul id="list" class="activity-list full-height" style="max-height: 500px;">
+                                <!-- All transactions injected here -->
+                            </ul>
+                        </section>
+                    </div>
+                </div>
+
+                <!-- Goals View -->
+                <div id="view-goals" class="view-section">
+                     <div class="bento-grid">
+                        <section class="bento-panel goal-panel bento-span-6">
+                            <div class="panel-header">
+                                <h2>Savings Goal</h2>
+                                <i class="fa-solid fa-bullseye text-accent"></i>
+                            </div>
+                            <div class="goal-content" style="padding: 2rem 0;">
+                                <div class="progress-ring-wrap" style="width: 160px; height: 160px;">
+                                    <svg class="progress-ring-svg" width="160" height="160">
+                                        <circle class="ring-bg" stroke-width="12" fill="transparent" r="70" cx="80" cy="80" />
+                                        <circle class="ring-fg" id="goalRing" stroke-width="12" fill="transparent" r="70" cx="80" cy="80" />
+                                    </svg>
+                                    <div class="progress-text">
+                                        <span id="goalPercent" style="font-size: 2rem">0%</span>
+                                    </div>
+                                </div>
+                                <div class="goal-details" style="margin-top: 1rem;">
+                                    <span class="goal-name" id="displayGoalName">Emergency Fund</span>
+                                    <span class="goal-amount"><span id="goalCurrent">0.00</span> / <span id="goalTotal">0.00</span></span>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="bento-panel goal-form-panel bento-span-6">
+                            <div class="panel-header">
+                                <h2>Configure Goal</h2>
+                                <i class="fa-solid fa-pen-to-square text-accent"></i>
+                            </div>
+                            <form id="goalForm" class="aesthetic-form">
+                                <div class="input-group">
+                                    <input type="text" id="goalInputName" placeholder="Goal Name (e.g. Emergency Fund)" required>
+                                </div>
+                                <div class="input-group">
+                                    <input type="number" id="goalInputAmount" placeholder="Target Amount" step="0.01" required>
+                                </div>
+                                <button type="submit" class="submit-action">Save Goal <i class="fa-solid fa-save"></i></button>
+                            </form>
+                        </section>
+                     </div>
+                </div>
+
+                <!-- Settings View -->
+                <div id="view-settings" class="view-section">
+                    <div class="bento-grid">
+                        <section class="bento-panel service-panel bento-span-6">
+                            <div class="panel-header">
+                                <h2>Automated Statements</h2>
+                                <label class="theme-switch" for="statementToggle">
+                                    <input type="checkbox" id="statementToggle">
+                                    <div class="slider round"></div>
+                                </label>
+                            </div>
+                            <div class="service-content">
+                                <p class="service-desc">Receive a personalized monthly expense report automatically sent to your inbox.</p>
+                                <div class="input-group">
+                                    <input type="email" id="statementEmail" placeholder="your.address@gmail.com">
+                                </div>
+                                <button id="saveStatementBtn" class="outline-btn wide-btn" style="margin-top: 1rem;">Save Configuration</button>
+                                <div class="statement-meta" id="statementMetaContainer" style="display: none;">
+                                    <span class="meta-label">Next Delivery:</span>
+                                    <span id="nextStatementDate" class="meta-value text-accent">-</span>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Navigation (Mobile) -->
+        <nav class="bottom-nav mobile-only-flex">
+            <ul class="nav-links mobile-nav">
+                <li class="nav-item active" data-target="view-dashboard" data-title="Overview"><i class="fa-solid fa-chart-pie"></i></li>
+                <li class="nav-item" data-target="view-transactions" data-title="Transactions"><i class="fa-solid fa-list-ul"></i></li>
+                <li class="nav-item" data-target="view-goals" data-title="Savings Goals"><i class="fa-solid fa-bullseye"></i></li>
+                <li class="nav-item" data-target="view-settings" data-title="Settings"><i class="fa-solid fa-gear"></i></li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Profile Modal (Entity Configuration) -->
+    <dialog class="aesthetic-modal" id="profileModal">
+        <div class="modal-wrapper">
+            <header class="modal-header">
+                <h2>Entity Configuration</h2>
+                <button class="icon-btn close-modal" id="closeModal"><i class="fa-solid fa-xmark"></i></button>
+            </header>
+            <div class="modal-content">
+                <div class="avatar-preview-wrap">
+                    <img id="profilePreview" src="" alt="Profile Preview">
+                </div>
+                
+                <div class="avatar-controls">
+                    <button class="outline-btn active" id="useGeneratedAvatar"><i class="fa-solid fa-robot"></i> Generative</button>
+                    <button class="outline-btn" id="uploadPictureBtn"><i class="fa-solid fa-upload"></i> Custom Image</button>
+                </div>
+                <input type="file" id="profilePictureInput" accept="image/*" hidden>
+                
+                <div class="input-group">
+                    <label>Designation Name</label>
+                    <input type="text" id="userName" placeholder="Enter identification" maxlength="20">
+                </div>
+            </div>
+            <footer class="modal-footer">
+                <button class="ghost-btn" id="cancelProfile">Dismiss</button>
+                <button class="submit-action confirm-btn" id="saveProfile">Confirm <i class="fa-solid fa-check"></i></button>
+            </footer>
+        </div>
+    </dialog>
+
+    <script src="app.js"></script>
+</body>
+</html>
